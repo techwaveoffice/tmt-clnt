@@ -51,12 +51,12 @@ export default function Home() {
           Tomato Disease Detection and Classification
         </h1>
         <div className="chat-box">
-          {/* <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type a message..."
-      /> */}
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type a message..."
+          />
 
           <input
             type="file"
