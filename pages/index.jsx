@@ -1,5 +1,6 @@
-import { useState } from "react";
-
+//import { useState } from "react";
+import { useState, CSSProperties } from "react";
+import ClipLoader from "react-spinners/ClipLoader";
 export default function Home() {
   const [message, setMessage] = useState(
     'Analyze the attached image and determine if it contains a tomato leaf. If the image does not contain a tomato leaf, return the following JSON response: { "message": "The uploaded image is not a tomato leaf. We cannot process this information." }. If the image does contain a tomato leaf, identify any disease present and return the response in the following JSON format: { "disease_name": "<Name of the disease or \'Healthy\'>", "causes": ["<Cause 1>", "<Cause 2>", "..."], "prevention": ["<Prevention method 1>", "<Prevention method 2>", "..."], "cure": ["<Cure method 1>", "<Cure method 2>", "..."] }. If the leaf is healthy, set "disease_name": "Healthy" and leave "causes", "prevention", and "cure" as empty arrays.'
@@ -8,7 +9,14 @@ export default function Home() {
   const [chat, setChat] = useState([]);
   const [final, setFinal] = useState({});
   const [preview, setPreview] = useState("");
+  let [loading, setLoading] = useState(false);
+  let [color, setColor] = useState("#ffffff");
 
+  const override = {
+    display: "block",
+    margin: "0 auto",
+    borderColor: "red",
+  };
   const sendMessage = async (e) => {
     if (!message.trim() && !image) return;
 
@@ -28,6 +36,7 @@ export default function Home() {
     }
 
     try {
+      setLoading(true)
       const response = await fetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,6 +45,8 @@ export default function Home() {
 
       const data = await response.json();
       if (response.ok) {
+        setLoading(false)
+        
         const botMessage = { role: "assistant", content: data.reply };
         function removeText(originalString, textToRemove) {
           return originalString.replace(new RegExp(textToRemove, "g"), "");
@@ -43,11 +54,12 @@ export default function Home() {
         setFinal(
           JSON.parse(removeText(removeText(data.reply, "```json"), "```"))
         );
-
+        
         setChat([...chat, userMessage, botMessage]);
       }
     } catch (error) {
       console.error("Error:", error);
+      setLoading(false)
     }
 
     //setImage(null);
@@ -88,16 +100,29 @@ export default function Home() {
           </div>
 
           <div className="flex justify-center p-10">
-            <button className="px-20 p-2" onClick={sendMessage}>
+            <button className="px-20 p-2 bg-blue-500 text-white font-bold rounded-xl" onClick={sendMessage}>
               Send
             </button>
           </div>
+
+
+      
           {chat.map((msg, i) => (
             <p key={i} className={msg.role}>
               <div className="text-center mb-5">
                 <strong className="text-xl ">
-                  {msg.role === "user"
-                    ? "Query Informations: "
+                  {msg.role === "user"?<>
+             {    loading && <div>
+                  <ClipLoader
+        color={color}
+        loading={loading}
+        cssOverride={override}
+        size={150}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      />
+                    </div>}
+                    </>
                     : " Prediction and results: "}
                 </strong>
               </div>
