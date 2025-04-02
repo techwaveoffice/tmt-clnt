@@ -1,0 +1,50 @@
+# .gitlab-ci.yml (Example for GitLab CI/CD)
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  image: node:18 # Or your preferred Node.js version
+  script:
+    - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - .next/
+      - public/ # If you have static assets in the public folder
+    expire_in: 1 day
+
+deploy:
+  stage: deploy
+  image: alpine:latest # Or your preferred minimal image
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - echo "Deploying Next.js application..."
+    # Replace with your deployment method (e.g., using a cloud provider's CLI, SCP, rsync, etc.)
+    # Example using a simple HTTP server (for demonstration purposes only, not production-ready):
+    # - apk add --no-cache nodejs npm
+    # - npm install -g serve
+    # - serve -s .next/ -l 3000 &
+    # - curl http://localhost:3000
+    # Example for deploying to AWS S3 and CloudFront:
+    # - apk add --no-cache aws-cli
+    # - aws s3 sync .next/ s3://your-bucket-name/.next/
+    # - aws s3 sync public/ s3://your-bucket-name/public/
+    # - aws cloudfront create-invalidation --distribution-id YOUR_DISTRIBUTION_ID --paths "/*"
+    # Example for deploying to a server using SCP
+    # - apk add --no-cache openssh-client
+    # - ssh-keyscan your.server.ip >> ~/.ssh/known_hosts
+    # - scp -r .next/ public/ user@your.server.ip:/path/to/your/deployment/directory
+    # Example for deploying to a server using rsync
+    # - apk add --no-cache rsync openssh-client
+    # - ssh-keyscan your.server.ip >> ~/.ssh/known_hosts
+    # - rsync -avz --delete .next/ public/ user@your.server.ip:/path/to/your/deployment/directory
+
+  environment:
+    name: production # Or staging, development, etc.
+   # url: "your-deployed-url.com" # Replace with your deployed URL
+  only:
+    - main # Or your main branch
