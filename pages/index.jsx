@@ -1,5 +1,5 @@
 //import { useState } from "react";
-import { useState, CSSProperties } from "react";
+import { useState, CSSProperties,useRef } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 export default function Home() {
   const [message, setMessage] = useState(
@@ -11,6 +11,7 @@ export default function Home() {
   const [preview, setPreview] = useState("");
   let [loading, setLoading] = useState(false);
   let [color, setColor] = useState("#ffffff");
+  const imgref= useRef(null);
 
   const override = {
     display: "block",
@@ -55,7 +56,7 @@ export default function Home() {
           JSON.parse(removeText(removeText(data.reply, "```json"), "```"))
         );
         
-        setChat([...chat, userMessage, botMessage]);
+        setChat((prevChat) => [...prevChat, userMessage, botMessage]);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -67,9 +68,9 @@ export default function Home() {
   };
 
   return (
-    <div className="flex justify-center">
-      <div className=" w-full container max-w-md">
-        <h1 className="text-2xl font-bold text-center my-10">
+    <div className="flex justify-cente">
+      <div className=" w-full container ">
+        <h1 className="bg-green-500 text-white font-bold text-center p-4  ">
           Tomato Disease Detection and Classification
         </h1>
         <div className="chat-box">
@@ -79,14 +80,37 @@ export default function Home() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type a message..."
           /> */}
-          <div className="flex justify-center my-5">
+          <div className="flex  my-5">
+            <button onClick={()=>{
+              imgref.current.click();
+            }}
+            className="px-4 py-2 bg-green-200 text-black font-bold rounded-xl flex items-center justify-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg> Add Image
+            </button>
             <input
               type="file"
               accept="image/*"
+              className="hidden"
+              ref={imgref}
               onChange={(e) => {
                 setImage(e.target.files[0]);
                 setPreview(URL.createObjectURL(e.target.files[0]));
               }}
+              capture="environment"
             />
           </div>
           <div className="flex justify-center">
@@ -100,20 +124,14 @@ export default function Home() {
           </div>
 
           <div className="flex justify-center p-10">
-            <button className="px-20 p-2 bg-blue-500 text-white font-bold rounded-xl" onClick={sendMessage}>
+            <button className="px-20 p-2 bg-green-500 text-white font-bold rounded-xl" onClick={sendMessage}>
               Send
             </button>
           </div>
-
-
-      
-          {chat.map((msg, i) => (
-            <p key={i} className={msg.role}>
-              <div className="text-center mb-5">
-                <strong className="text-xl ">
-                  {msg.role === "user"?<>
-             {    loading && <div>
-                  <ClipLoader
+{
+  loading ? (
+    <div className="flex justify-center items-center">
+      <ClipLoader
         color={color}
         loading={loading}
         cssOverride={override}
@@ -121,61 +139,56 @@ export default function Home() {
         aria-label="Loading Spinner"
         data-testid="loader"
       />
-                    </div>}
-                    </>
-                    : " Prediction and results: "}
-                </strong>
-              </div>
-
-              {msg.role !== "user" && (
-                <div>
+    </div>
+  ) : <div>
+                  
                   {final.message ? (
                     <div> {final.message}</div>
                   ) : (
                     <div className="py-10 ">
-                      <div className="font-bold text-center ">Disease Name</div>
+                      <div className="font-bold text-center bg-green-200 ">Disease Name</div>
                       <nav className="text-center py-4">
                         {final.disease_name}
                       </nav>
 
-                      <div className="font-bold text-center mt-10 ">
+                      <div className="font-bold text-center mt-10 bg-green-200">
                         Causes of Disease
                       </div>
 
-                      <div>
+                      <div className="flex flex-col ">
                         {final.causes &&
-                          final.causes.map((cause) => {
+                          final.causes.map((cause,i) => {
                             return (
-                              <nav className="text-center py-2 text-xs">
+                              <nav key={i+"cau"} className="text-center py-2 text-xs">
                                 {cause}
                               </nav>
                             );
                           })}
                       </div>
-                      <div className="font-bold text-center mt-10 ">
+                      <div className="font-bold text-center mt-10 bg-green-200">
                         Preventions of Disease
                       </div>
 
                       <div>
                         {final.prevention &&
-                          final.prevention.map((cause) => {
+                          final.prevention.map((cause,i) => {
                             return (
-                              <nav className="text-center py-2 text-xs">
+                              <nav key={i+"prev"} className="text-center py-2 text-xs">
                                 {cause}
                               </nav>
                             );
                           })}
                       </div>
 
-                      <div className="font-bold text-center mt-10 ">
+                      <div className="font-bold text-center mt-10 bg-green-200">
                         Cure of Disease
                       </div>
 
                       <div>
                         {final.cure &&
-                          final.cure.map((cause) => {
+                          final.cure.map((cause,i) => {
                             return (
-                              <nav className="text-center py-2 text-xs">
+                              <nav key={i+"cu"} className="text-center py-2 text-xs">
                                 {cause}
                               </nav>
                             );
@@ -185,9 +198,10 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-              )}
-            </p>
-          ))}
+}
+               
+            
+     
         </div>
       </div>
     </div>
