@@ -70,21 +70,21 @@ export default function Home() {
   return (
     <div className="flex justify-cente">
       <div className=" w-full container ">
-        <h1 className="bg-green-500 text-white font-bold text-center p-4  ">
+        <h1 className="bg-green-500 text-white font-bold text-center p-4  fixed top-0 left-0 right-0 z-10">
           Tomato Disease Detection and Classification
         </h1>
-        <div className="chat-box">
+        <div className="chat-box mt-20">
           {/* <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type a message..."
           /> */}
-          <div className="flex  my-5">
+          <div className="flex  my-5 px-2">
             <button onClick={()=>{
               imgref.current.click();
             }}
-            className="px-4 py-2 bg-green-200 text-black font-bold rounded-xl flex items-center justify-center"
+            className="px-4 fixed py-2 bg-green-200 text-black font-bold rounded-xl flex items-center justify-center"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -140,18 +140,18 @@ export default function Home() {
         data-testid="loader"
       />
     </div>
-  ) : <div>
+  ) : <div className="text-white">
                   
                   {final.message ? (
                     <div> {final.message}</div>
                   ) : (
                     <div className="py-10 ">
-                      <div className="font-bold text-center bg-green-200 ">Disease Name</div>
+                      <div className="font-bold text-center bg-black text-green-500 ">Disease Name</div>
                       <nav className="text-center py-4">
                         {final.disease_name}
                       </nav>
 
-                      <div className="font-bold text-center mt-10 bg-green-200">
+                      <div className="font-bold text-center mt-10 bg-black text-green-500">
                         Causes of Disease
                       </div>
 
@@ -165,7 +165,7 @@ export default function Home() {
                             );
                           })}
                       </div>
-                      <div className="font-bold text-center mt-10 bg-green-200">
+                      <div className="font-bold text-center mt-10 bg-black text-green-500">
                         Preventions of Disease
                       </div>
 
@@ -180,7 +180,7 @@ export default function Home() {
                           })}
                       </div>
 
-                      <div className="font-bold text-center mt-10 bg-green-200">
+                      <div className="font-bold text-center mt-10 bg-black  text-green-500">
                         Cure of Disease
                       </div>
 
