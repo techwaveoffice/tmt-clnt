@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: "100mb", // ✅ Increase size limit (e.g., 10MB)
+      sizeLimit: "100mb",
     },
   },
 };
@@ -17,23 +17,28 @@ export default async function handler(req, res) {
 
   try {
     const { message, imageUrl } = req.body;
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // safer model
 
     let contents = [{ role: "user", parts: [{ text: message }] }];
 
-    // ✅ Check if an image is provided
     if (imageUrl) {
       contents[0].parts.push({
-        inlineData: { mimeType: "image/png", data: imageUrl.split(",")[1] },
+        inlineData: {
+          mimeType: "image/png",
+          data: imageUrl.split(",")[1],
+        },
       });
     }
 
-    const response = await model.generateContent({ contents });
-    const reply = response.response.candidates[0].content.parts[0].text;
+    const result = await model.generateContent({ contents });
+    const reply = result.response.candidates?.[0]?.content?.parts?.[0]?.text || "No reply.";
 
     res.status(200).json({ reply });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Failed to fetch response from Gemini" });
+    console.error("Gemini API error:", error);
+    res.status(error.status || 500).json({
+      error: error.message || "Failed to fetch response from Gemini",
+      details: error,
+    });
   }
 }
