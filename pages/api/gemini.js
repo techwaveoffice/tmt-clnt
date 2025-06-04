@@ -8,7 +8,7 @@ export const config = {
   },
 };
 
-const genAI = new GoogleGenerativeAI("AIzaSyCgiSNoIUQHsjJ0z31gVMZ5sHnuhLGriUM");
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
