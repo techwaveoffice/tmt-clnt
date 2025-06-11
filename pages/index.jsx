@@ -7,7 +7,7 @@ const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_API_KEY);
 
 export default function Home() {
   const [message, setMessage] = useState(
-    'Analyze the attached image and determine if it contains a tomato leaf. If the image does not contain a tomato leaf, return the following JSON response: { "message": "The uploaded image is not a tomato leaf. We cannot process this information." }. If the image does contain a tomato leaf, identify any disease present and return the response in the following JSON format: { "disease_name": "<Name of the disease or Healthy>", "causes": ["<Cause 1>", "<Cause 2>", "..."], "prevention": ["<Prevention method 1>", "<Prevention method 2>", "..."], "cure": ["<Cure method 1>", "<Cure method 2>", "..."] }. If the leaf is healthy, set "disease_name": "Healthy" and leave "causes", "prevention", and "cure" as empty arrays.'
+    'Analyze the attached image and determine if it contains a tomato leaf. If the image does not contain a tomato leaf, return the following JSON response: { "message": "The uploaded image is not a tomato leaf. We cannot process this information." }. If the image does contain a tomato leaf, identify any disease present and return the response in the following JSON format: { "disease_name": "<Name of the disease or Healthy>", "causes": [""<Cause 1>"", ""<Cause 2>"", ""...""], "prevention": [""<Prevention method 1>"", ""<Prevention method 2>"", ""...""], "cure": [""<Cure method 1>"", ""<Cure method 2>"", ""... ""] }. If the leaf is healthy, set "disease_name": "Healthy" and leave "causes", "prevention", and "cure" as empty arrays.'
   );
   const [image, setImage] = useState(null);
   const [chat, setChat] = useState([]);
@@ -70,6 +70,26 @@ export default function Home() {
     }
   };
 
+  const handleImageInput = (e) => {
+    setImage(e.target.files[0]);
+    setPreview(URL.createObjectURL(e.target.files[0]));
+  };
+
+  const handleCameraCapture = async () => {
+    // Create a hidden file input for camera capture
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.onchange = (e) => handleImageInput(e);
+    input.click();
+  };
+
+  const handleUploadClick = () => {
+    imgref.current.value = null; // reset file input
+    imgref.current.click();
+  };
+
   return (
     <div className="flex justify-cente">
       <div className=" w-full container ">
@@ -83,11 +103,10 @@ export default function Home() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type a message..."
           /> */}
-          <div className="flex  my-5 px-2">
-            <button onClick={()=>{
-              imgref.current.click();
-            }}
-            className="px-4 fixed py-2 bg-green-200 text-black font-bold rounded-xl flex items-center justify-center"
+          <div className="flex my-5 px-2 gap-4 justify-center">
+            <button
+              onClick={handleCameraCapture}
+              className="px-4 py-2 bg-green-200 text-black font-bold rounded-xl flex items-center justify-center"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -102,18 +121,33 @@ export default function Home() {
                   strokeLinejoin="round"
                   d="M12 4v16m8-8H4"
                 />
-              </svg> Add Image
+              </svg> Take Photo
+            </button>
+            <button
+              onClick={handleUploadClick}
+              className="px-4 py-2 bg-blue-200 text-black font-bold rounded-xl flex items-center justify-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                />
+              </svg> Upload Photo
             </button>
             <input
               type="file"
               accept="image/*"
               className="hidden"
               ref={imgref}
-              onChange={(e) => {
-                setImage(e.target.files[0]);
-                setPreview(URL.createObjectURL(e.target.files[0]));
-              }}
-              capture="environment"
+              onChange={handleImageInput}
             />
           </div>
           <div className="flex justify-center">
