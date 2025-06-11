@@ -1,9 +1,13 @@
 //import { useState } from "react";
-import { useState, CSSProperties,useRef } from "react";
+import { useState, CSSProperties, useRef } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_API_KEY);
+
 export default function Home() {
   const [message, setMessage] = useState(
-    'Analyze the attached image and determine if it contains a tomato leaf. If the image does not contain a tomato leaf, return the following JSON response: { "message": "The uploaded image is not a tomato leaf. We cannot process this information." }. If the image does contain a tomato leaf, identify any disease present and return the response in the following JSON format: { "disease_name": "<Name of the disease or \'Healthy\'>", "causes": ["<Cause 1>", "<Cause 2>", "..."], "prevention": ["<Prevention method 1>", "<Prevention method 2>", "..."], "cure": ["<Cure method 1>", "<Cure method 2>", "..."] }. If the leaf is healthy, set "disease_name": "Healthy" and leave "causes", "prevention", and "cure" as empty arrays.'
+    'Analyze the attached image and determine if it contains a tomato leaf. If the image does not contain a tomato leaf, return the following JSON response: { "message": "The uploaded image is not a tomato leaf. We cannot process this information." }. If the image does contain a tomato leaf, identify any disease present and return the response in the following JSON format: { "disease_name": "<Name of the disease or Healthy>", "causes": ["<Cause 1>", "<Cause 2>", "..."], "prevention": ["<Prevention method 1>", "<Prevention method 2>", "..."], "cure": ["<Cure method 1>", "<Cure method 2>", "..."] }. If the leaf is healthy, set "disease_name": "Healthy" and leave "causes", "prevention", and "cure" as empty arrays.'
   );
   const [image, setImage] = useState(null);
   const [chat, setChat] = useState([]);
@@ -37,34 +41,33 @@ export default function Home() {
     }
 
     try {
-      setLoading(true)
-      const response = await fetch("/api/gemini", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, imageUrl }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setLoading(false)
-        
-        const botMessage = { role: "assistant", content: data.reply };
-        function removeText(originalString, textToRemove) {
-          return originalString.replace(new RegExp(textToRemove, "g"), "");
-        }
-        setFinal(
-          JSON.parse(removeText(removeText(data.reply, "```json"), "```"))
-        );
-        
-        setChat((prevChat) => [...prevChat, userMessage, botMessage]);
+      setLoading(true);
+      // Gemini direct call instead of API
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Use free flash model
+      let contents = [{ role: "user", parts: [{ text: message }] }];
+      if (imageUrl) {
+        contents[0].parts.push({
+          inlineData: {
+            mimeType: "image/png",
+            data: imageUrl.split(",")[1],
+          },
+        });
       }
+      const result = await model.generateContent({ contents });
+      const reply = result.response.candidates?.[0]?.content?.parts?.[0]?.text || "No reply.";
+      setLoading(false);
+      const botMessage = { role: "assistant", content: reply };
+      function removeText(originalString, textToRemove) {
+        return originalString.replace(new RegExp(textToRemove, "g"), "");
+      }
+      setFinal(
+        JSON.parse(removeText(removeText(reply, "```json"), "```"))
+      );
+      setChat((prevChat) => [...prevChat, userMessage, botMessage]);
     } catch (error) {
       console.error("Error:", error);
-      setLoading(false)
+      setLoading(false);
     }
-
-    //setImage(null);
-    //setPreview("");
   };
 
   return (
